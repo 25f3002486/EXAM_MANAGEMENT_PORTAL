@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stat, badge %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h3 class="mb-3">Admin Dashboard</h3>
+{% if stats.pending_examiners %}
+<div class="alert alert-warning py-2"><i class="bi bi-person-exclamation"></i>
+  {{ stats.pending_examiners }} examiner registration(s) awaiting approval.
+  <a href="{{ url_for('admin.examiners', status='Pending') }}" class="alert-link">Review now</a></div>
+{% endif %}
+<div class="row g-3 mb-4">
+  {{ stat('Courses', stats.courses, 'journal-bookmark', 'primary', url_for('admin.courses')) }}
+  {{ stat('Examinations', stats.exams, 'clipboard-check', 'success', url_for('admin.exams')) }}
+  {{ stat('Examiners', stats.examiners, 'person-badge', 'info', url_for('admin.examiners')) }}
+  {{ stat('Students', stats.students, 'people', 'warning', url_for('admin.students')) }}
+  {{ stat('Exam Slots', stats.slots, 'calendar3', 'danger', url_for('admin.slots')) }}
+  {{ stat('Bookings', stats.bookings, 'bookmark-check', 'secondary', url_for('admin.bookings')) }}
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header">Examinations by status</div>
+      <div class="card-body">
+        {% set total = stats.exams or 1 %}
+        {% for s in statuses %}
+          {% set n = exam_status.get(s, 0) %}
+          <div class="d-flex justify-content-between small"><span>{{ s }}</span><span>{{ n }}</span></div>
+          <div class="progress mb-2" style="height:.6rem"><div class="progress-bar bg-{{ s|badge }}" style="width: {{ (n / total * 100)|round }}%"></div></div>
+        {% endfor %}
+        <div class="small text-muted mt-3">Active bookings: {{ stats.active_bookings }} · Evaluations done: {{ stats.evaluations }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header">Examiner workload <span class="text-muted fw-normal small">(students booked)</span></div>
+      <div class="card-body">
+        {% for name, n in workload %}
+          <div class="d-flex justify-content-between small"><span>{{ name }}</span><span>{{ n }}</span></div>
+          <div class="bg-light rounded mb-2"><div class="bar" style="width: {{ (n / max_work * 100)|round }}%; min-width: 4px"></div></div>
+        {% else %}<p class="text-muted small mb-0">No slots created yet.</p>{% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header">Recent bookings</div>
+      <ul class="list-group list-group-flush">
+        {% for b in recent %}
+        <li class="list-group-item small d-flex justify-content-between">
+          <span><a href="{{ url_for('admin.booking_detail', bid=b.id) }}">{{ b.code }}</a> · {{ b.student.name }}<br><span class="text-muted">{{ b.exam.name }}</span></span>
+          {{ badge(b.status) }}</li>
+        {% else %}<li class="list-group-item text-muted small">No bookings yet.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

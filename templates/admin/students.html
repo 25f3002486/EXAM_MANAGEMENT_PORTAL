@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, post_button %}
+{% block title %}Students{% endblock %}
+{% block content %}
+<h3 class="mb-3">Students</h3>
+<div class="card shadow-sm border-0"><div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead><tr><th>ID</th><th>Roll no.</th><th>Name</th><th>Contact</th><th>Program</th><th>Bookings</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for u in students %}
+    <tr><td>{{ u.code }}</td><td>{{ u.roll_no }}</td>
+      <td><a href="{{ url_for('admin.user_detail', uid=u.id) }}" class="fw-semibold">{{ u.name }}</a></td>
+      <td class="small">{{ u.email }}<br>{{ u.phone or '' }}</td><td>{{ u.program or '—' }}</td>
+      <td>{{ u.bookings|length }}</td><td>{{ badge(u.status) }}</td>
+      <td class="text-end">
+        {% if u.status == 'Active' %}{{ post_button(url_for('admin.user_status', uid=u.id), 'Deactivate', 'btn-outline-danger', 'action', 'deactivate') }}
+        {% else %}{{ post_button(url_for('admin.user_status', uid=u.id), 'Activate', 'btn-outline-success', 'action', 'activate') }}{% endif %}
+      </td></tr>
+  {% else %}<tr><td colspan="8" class="text-center text-muted py-4">No students registered yet.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+{% endblock %}

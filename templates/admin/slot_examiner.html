@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Change examiner{% endblock %}
+{% block content %}
+<div class="card shadow-sm border-0 mx-auto" style="max-width:600px">
+  <div class="card-header">Change assigned examiner · {{ slot.code }}</div>
+  <div class="card-body">
+    <p class="mb-1"><strong>{{ slot.exam.name }}</strong> — {{ slot.label }}</p>
+    <p class="text-muted small">Current examiner: {{ slot.examiner.name }} · {{ slot.active_bookings|length }} student(s) booked.
+      All booked students (and their pending evaluations) move to the new examiner.</p>
+    <form method="post">
+      <label class="form-label">New examiner *</label>
+      <select name="examiner_id" class="form-select mb-3" required>
+        {% for u in examiners %}<option value="{{ u.id }}">{{ u.name }} ({{ u.department or '—' }})</option>{% endfor %}
+      </select>
+      <label class="form-label">Reason</label>
+      <input name="reason" class="form-control mb-3" placeholder="e.g. Examiner on medical leave">
+      <button class="btn btn-primary">Reassign</button>
+      <a href="{{ url_for('admin.slots') }}" class="btn btn-link">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

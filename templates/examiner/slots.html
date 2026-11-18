@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, post_button %}
+{% block title %}My slots{% endblock %}
+{% block content %}
+<h3 class="mb-3">My examination slots</h3>
+<div class="card shadow-sm border-0"><div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Slot</th><th>Examination</th><th>Date & time</th><th>Venue</th><th>Booked</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for s in slots %}
+    <tr><td>{{ s.code }}</td><td>{{ s.exam.name }}</td><td class="small">{{ s.label }}</td><td class="small">{{ s.venue or '—' }}</td>
+      <td>{{ s.active_bookings|length }}/{{ s.capacity }}</td><td>{{ badge(s.status) }}</td>
+      <td class="text-end text-nowrap">
+        <a href="{{ url_for('examiner.slot_students', sid=s.id) }}" class="btn btn-sm btn-outline-secondary">Students</a>
+        {% if s.editable %}
+          <a href="{{ url_for('examiner.slot_edit', sid=s.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+          {{ post_button(url_for('examiner.slot_delete', sid=s.id), 'Remove', 'btn-outline-danger') }}
+        {% endif %}
+      </td></tr>
+  {% else %}<tr><td colspan="7" class="text-center text-muted py-4">You have not created any slots yet.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+<p class="small text-muted mt-2">Slots can be edited or removed only before booking starts and while no student has booked them.</p>
+{% endblock %}

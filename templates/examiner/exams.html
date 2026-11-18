@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, window %}
+{% block title %}My examinations{% endblock %}
+{% block content %}
+<h3 class="mb-3">Assigned examinations</h3>
+<div class="row g-3">
+{% for e in exams %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between"><span class="text-muted small">{{ e.code }} · {{ e.course.code }}</span>{{ badge(e.status) }}</div>
+        <h5 class="mt-1">{{ e.name }}</h5>
+        <p class="small text-muted mb-2">{{ e.exam_type }} · {{ e.duration }} min · {{ e.max_marks|round(1) }} marks</p>
+        <div class="small"><strong>Slot creation:</strong> {{ window(e.slot_creation_start, e.slot_creation_end) }}</div>
+        <div class="small"><strong>Booking:</strong> {{ window(e.booking_start, e.booking_end) }}</div>
+        <div class="small mt-2"><strong>Rubric:</strong> {% for r in e.rubrics %}{{ r.criterion }} ({{ r.weightage|round(0) }}%){% if not loop.last %}, {% endif %}{% else %}<span class="text-muted">none</span>{% endfor %}</div>
+        <div class="small mt-1">My slots: {{ e.slots|selectattr('examiner_id', 'equalto', current_user.id)|list|length }}</div>
+      </div>
+      <div class="card-footer bg-white border-0">
+        {% if e.slot_creation_allowed %}
+          <a href="{{ url_for('examiner.slot_new', eid=e.id) }}" class="btn btn-primary btn-sm w-100"><i class="bi bi-plus-lg"></i> Create slot</a>
+        {% else %}
+          <button class="btn btn-outline-secondary btn-sm w-100" disabled>Slot creation closed</button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% else %}
+  <p class="text-muted">No examinations are assigned to you yet.</p>
+{% endfor %}
+</div>
+{% endblock %}

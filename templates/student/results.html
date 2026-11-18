@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Results{% endblock %}
+{% block content %}
+<h3 class="mb-3">Published results & feedback</h3>
+{% for b in rows %}
+{% set ev = b.evaluation %}
+<div class="card shadow-sm border-0 mb-3">
+  <div class="card-body">
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+      <div><h5 class="mb-0">{{ b.exam.name }}</h5>
+        <div class="small text-muted">{{ b.exam.course.code }} · {{ b.exam.exam_type }} · {{ b.slot.date.strftime('%d %b %Y') }} · Examiner: {{ ev.examiner.name }}</div></div>
+      <div class="text-end">
+        <div class="fs-4 fw-bold">{{ ev.total_marks|round(2) }} <span class="fs-6 text-muted">/ {{ b.exam.max_marks|round(1) }}</span></div>
+        {% if b.exam.pass_marks is not none %}
+          {% if ev.total_marks >= b.exam.pass_marks %}<span class="badge text-bg-success">Pass</span>{% else %}<span class="badge text-bg-danger">Not passed</span>{% endif %}
+        {% endif %}
+      </div>
+    </div>
+    {% if ev.scores %}
+    <table class="table table-sm mt-3 mb-2"><thead><tr><th>Criterion</th><th>Weight</th><th>Marks</th></tr></thead><tbody>
+      {% for s in ev.scores %}<tr><td>{{ s.rubric.criterion }}</td><td>{{ s.rubric.weightage|round(1) }}%</td><td>{{ s.marks }} / {{ s.rubric.max_marks }}</td></tr>{% endfor %}
+    </tbody></table>
+    {% endif %}
+    <p class="mb-2"><strong>Remarks:</strong> {{ ev.remarks or '—' }}</p>
+    <a href="{{ url_for('student.scorecard', bid=b.id) }}" class="btn btn-sm btn-outline-primary">View scorecard</a>
+    <a href="{{ url_for('student.scorecard', bid=b.id, download=1) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i> Download</a>
+  </div>
+</div>
+{% else %}
+<p class="text-muted">No results have been published yet.</p>
+{% endfor %}
+{% endblock %}

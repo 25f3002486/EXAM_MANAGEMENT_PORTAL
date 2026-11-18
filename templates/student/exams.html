@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, window %}
+{% block title %}Examinations{% endblock %}
+{% block content %}
+<h3 class="mb-3">Examinations</h3>
+<form class="card card-body shadow-sm border-0 mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-4"><label class="form-label small">Search</label>
+      <input name="q" class="form-control" value="{{ q }}" placeholder="Exam or course name / code"></div>
+    <div class="col-md-3"><label class="form-label small">Course</label>
+      <select name="course_id" class="form-select"><option value="">All courses</option>
+        {% for c in courses %}<option value="{{ c.id }}" {% if c.id == course_id %}selected{% endif %}>{{ c.code }} – {{ c.name }}</option>{% endfor %}</select></div>
+    <div class="col-md-2"><label class="form-label small">Type</label>
+      <select name="type" class="form-select"><option value="">All types</option>
+        {% for t in types %}<option {% if t == etype %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+    <div class="col-md-2"><div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" name="open" value="1" id="open" {% if only_open %}checked{% endif %}>
+      <label class="form-check-label small" for="open">Booking open only</label></div></div>
+    <div class="col-md-1"><button class="btn btn-primary w-100">Go</button></div>
+  </div>
+</form>
+<div class="row g-3">
+{% for e in exams %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between"><span class="small text-muted">{{ e.course.code }} · {{ e.exam_type }}</span>{{ badge(e.status) }}</div>
+        <h5 class="mt-1">{{ e.name }}</h5>
+        <p class="small text-muted mb-1">{{ e.course.name }} · {{ e.duration }} min · {{ e.max_marks|round(1) }} marks</p>
+        <div class="small"><strong>Booking:</strong> {{ window(e.booking_start, e.booking_end) }}</div>
+        <div class="small"><strong>Slots:</strong> {{ e.slots|selectattr('status', 'equalto', 'Available')|list|length }} available</div>
+      </div>
+      <div class="card-footer bg-white border-0">
+        {% if e.id in booked %}
+          <a href="{{ url_for('student.exam_detail', eid=e.id) }}" class="btn btn-outline-primary btn-sm w-100">{{ booked[e.id].status }} · view</a>
+        {% else %}
+          <a href="{{ url_for('student.exam_detail', eid=e.id) }}" class="btn btn-sm w-100 {{ 'btn-primary' if e.booking_allowed else 'btn-outline-secondary' }}">{{ 'View & book slots' if e.booking_allowed else 'View details' }}</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% else %}
+  <p class="text-muted">No examinations match your search.</p>
+{% endfor %}
+</div>
+{% endblock %}

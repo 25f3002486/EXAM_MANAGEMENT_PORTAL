@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="card shadow-sm border-0 mx-auto" style="max-width:640px">
+  <div class="card-header">My profile <span class="text-muted fw-normal">· {{ current_user.code }}</span></div>
+  <div class="card-body">
+    <form method="post">
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Name</label>
+          <input name="name" class="form-control" required value="{{ current_user.name }}"></div>
+        <div class="col-md-6"><label class="form-label">Email</label>
+          <input class="form-control" value="{{ current_user.email }}" disabled></div>
+        <div class="col-md-6"><label class="form-label">Phone</label>
+          <input name="phone" class="form-control" value="{{ current_user.phone or '' }}"></div>
+        {% if current_user.role == 'examiner' %}
+        <div class="col-md-6"><label class="form-label">Department</label>
+          <input name="department" class="form-control" value="{{ current_user.department or '' }}"></div>
+        <div class="col-md-6"><label class="form-label">Designation</label>
+          <input name="designation" class="form-control" value="{{ current_user.designation or '' }}"></div>
+        {% elif current_user.role == 'student' %}
+        <div class="col-md-6"><label class="form-label">Roll number</label>
+          <input class="form-control" value="{{ current_user.roll_no }}" disabled></div>
+        <div class="col-md-6"><label class="form-label">Program</label>
+          <input name="program" class="form-control" value="{{ current_user.program or '' }}"></div>
+        {% endif %}
+        <div class="col-12"><hr><h6>Change password <small class="text-muted">(optional)</small></h6></div>
+        <div class="col-md-6"><label class="form-label">Current password</label>
+          <input type="password" name="current_password" class="form-control"></div>
+        <div class="col-md-6"><label class="form-label">New password</label>
+          <input type="password" name="new_password" class="form-control" minlength="6"></div>
+      </div>
+      <button class="btn btn-primary mt-4">Save changes</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

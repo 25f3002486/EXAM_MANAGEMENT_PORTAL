@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, post_button %}
+{% block title %}Examiners{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h3 class="mb-0">Examiners</h3>
+  <div class="d-flex gap-2">
+    <div class="btn-group btn-group-sm">
+      {% for s in ['', 'Pending', 'Active', 'Inactive'] %}
+      <a href="{{ url_for('admin.examiners', status=s or None) }}" class="btn btn-outline-secondary {% if (status or '') == s %}active{% endif %}">{{ s or 'All' }}</a>
+      {% endfor %}
+    </div>
+    <a href="{{ url_for('admin.examiner_new') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add examiner</a>
+  </div>
+</div>
+<div class="card shadow-sm border-0"><div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead><tr><th>ID</th><th>Name</th><th>Contact</th><th>Department</th><th>Assigned exams</th><th>Slots</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for u in examiners %}
+    <tr><td>{{ u.code }}</td>
+      <td><a href="{{ url_for('admin.user_detail', uid=u.id) }}" class="fw-semibold">{{ u.name }}</a><div class="small text-muted">{{ u.designation or '' }}</div></td>
+      <td class="small">{{ u.email }}<br>{{ u.phone or '' }}</td><td>{{ u.department or '—' }}</td>
+      <td>{{ u.assigned_exams|length }}</td><td>{{ u.slots|length }}</td><td>{{ badge(u.status) }}</td>
+      <td class="text-end text-nowrap">
+        {% if u.status == 'Pending' %}{{ post_button(url_for('admin.user_status', uid=u.id), 'Approve', 'btn-success', 'action', 'approve') }}{% endif %}
+        {% if u.status == 'Active' %}{{ post_button(url_for('admin.user_status', uid=u.id), 'Deactivate', 'btn-outline-danger', 'action', 'deactivate') }}
+        {% else %}{{ post_button(url_for('admin.user_status', uid=u.id), 'Reject' if u.status == 'Pending' else 'Activate', 'btn-outline-danger' if u.status == 'Pending' else 'btn-outline-success', 'action', 'deactivate' if u.status == 'Pending' else 'activate') }}{% endif %}
+      </td></tr>
+  {% else %}<tr><td colspan="8" class="text-center text-muted py-4">No examiners found.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+{% endblock %}

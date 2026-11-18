@@ -1,0 +1,13 @@
+body { background: #f4f6fb; min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1; }
+.bg-emp { background: linear-gradient(90deg, #1e3a8a, #3b5bdb); }
+.stat-card { transition: transform .15s ease; }
+.stat-card:hover { transform: translateY(-2px); }
+.card { border-radius: .75rem; }
+.card-header { background: #fff; font-weight: 600; }
+.table th { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: #6c757d; }
+.auth-card { max-width: 460px; margin: 3rem auto; }
+.bar { height: .6rem; border-radius: 1rem; background: #3b5bdb; }
+.timeline-step { border-left: 3px solid #dee2e6; padding-left: .75rem; margin-bottom: .5rem; }
+.timeline-step.on { border-color: #198754; }
+@media print { nav, footer, .no-print { display: none !important; } }

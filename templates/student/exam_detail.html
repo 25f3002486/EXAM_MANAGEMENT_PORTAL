@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, post_button, window %}
+{% block title %}{{ exam.name }}{% endblock %}
+{% block content %}
+<div class="mb-3">
+  <div class="text-muted small">{{ exam.code }} · {{ exam.course.code }} – {{ exam.course.name }}</div>
+  <h3>{{ exam.name }} {{ badge(exam.status) }}</h3>
+  <p class="text-muted mb-1">{{ exam.exam_type }} · {{ exam.duration }} minutes · {{ exam.max_marks|round(1) }} marks</p>
+  {% if exam.description %}<p>{{ exam.description }}</p>{% endif %}
+  <p class="small"><strong>Booking window:</strong> {{ window(exam.booking_start, exam.booking_end) }}</p>
+</div>
+
+{% if mine %}
+<div class="alert alert-primary d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <span>You are booked: <strong>{{ mine.slot.label }}</strong> with {{ mine.slot.examiner.name }} ({{ mine.code }}, {{ mine.status }})</span>
+  {% if mine.status == 'Booked' and exam.booking_allowed %}{{ post_button(url_for('student.cancel', bid=mine.id), 'Cancel booking', 'btn-outline-danger') }}{% endif %}
+</div>
+{% elif not exam.booking_allowed %}
+<div class="alert alert-secondary">Booking is not open for this examination right now.</div>
+{% endif %}
+
+{% if exam.rubrics %}
+<div class="card shadow-sm border-0 mb-3"><div class="card-header">Evaluation criteria</div>
+  <ul class="list-group list-group-flush">{% for r in exam.rubrics %}<li class="list-group-item small">{{ r.criterion }} — {{ r.weightage|round(1) }}%<span class="text-muted"> {{ r.description or '' }}</span></li>{% endfor %}</ul></div>
+{% endif %}
+
+<div class="card shadow-sm border-0"><div class="card-header">Slots</div><div class="table-responsive">
+<table class="table align-middle mb-0">
+  <thead><tr><th>Date & time</th><th>Venue</th><th>Examiner</th><th>Seats left</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for s in slots %}
+    <tr {% if mine and mine.slot_id == s.id %}class="table-primary"{% endif %}><td>{{ s.label }}</td><td class="small">{{ s.venue or '—' }}</td><td>{{ s.examiner.name }}</td>
+      <td>{{ s.available_seats }} / {{ s.capacity }}</td><td>{{ badge(s.status) }}</td>
+      <td class="text-end">{% if not mine and exam.booking_allowed and s.status == 'Available' %}{{ post_button(url_for('student.book', sid=s.id), 'Book', 'btn-primary') }}{% endif %}</td></tr>
+  {% else %}<tr><td colspan="6" class="text-center text-muted py-4">No slots have been published yet.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+{% endblock %}

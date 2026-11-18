@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Scorecard {{ b.code }}</title>
+<style>
+  body { font-family: Segoe UI, Arial, sans-serif; color: #222; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+  h1 { font-size: 1.4rem; margin: 0; } .muted { color: #666; font-size: .9rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .45rem .6rem; text-align: left; } th { background: #f1f3f9; }
+  .total { font-size: 1.3rem; font-weight: bold; } .head { border-bottom: 3px solid #1e3a8a; padding-bottom: .6rem; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+<div class="head">
+  <h1>Examination Scorecard</h1>
+  <div class="muted">Examination Management Portal · Generated {{ generated.strftime('%d %b %Y %H:%M') }}</div>
+</div>
+<table>
+  <tr><th>Student</th><td>{{ b.student.name }}</td><th>Roll no.</th><td>{{ b.student.roll_no }}</td></tr>
+  <tr><th>Course</th><td>{{ b.exam.course.code }} – {{ b.exam.course.name }}</td><th>Booking ID</th><td>{{ b.code }}</td></tr>
+  <tr><th>Examination</th><td>{{ b.exam.name }} ({{ b.exam.exam_type }})</td><th>Date</th><td>{{ b.slot.label }}</td></tr>
+  <tr><th>Examiner</th><td colspan="3">{{ b.evaluation.examiner.name }}</td></tr>
+</table>
+{% if b.evaluation.scores %}
+<table>
+  <tr><th>Criterion</th><th>Weightage</th><th>Marks awarded</th></tr>
+  {% for s in b.evaluation.scores %}<tr><td>{{ s.rubric.criterion }}</td><td>{{ s.rubric.weightage|round(1) }}%</td><td>{{ s.marks }} / {{ s.rubric.max_marks }}</td></tr>{% endfor %}
+</table>
+{% endif %}
+<p class="total">Total: {{ b.evaluation.total_marks|round(2) }} / {{ b.exam.max_marks|round(1) }}
+  {% if b.exam.pass_marks is not none %} — {{ 'PASS' if b.evaluation.total_marks >= b.exam.pass_marks else 'NOT PASSED' }}{% endif %}</p>
+<p><strong>Examiner remarks:</strong> {{ b.evaluation.remarks or '—' }}</p>
+</body>
+</html>

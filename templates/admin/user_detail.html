@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}{{ user.name }}{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <div class="text-muted small">{{ user.code }} · <span class="text-capitalize">{{ user.role }}</span></div>
+        <h4>{{ user.name }} {{ badge(user.status) }}</h4>
+        <dl class="small mb-0">
+          <dt>Email</dt><dd>{{ user.email }}</dd>
+          <dt>Phone</dt><dd>{{ user.phone or '—' }}</dd>
+          {% if user.role == 'examiner' %}
+          <dt>Department</dt><dd>{{ user.department or '—' }}</dd>
+          <dt>Designation</dt><dd>{{ user.designation or '—' }}</dd>
+          {% else %}
+          <dt>Roll number</dt><dd>{{ user.roll_no }}</dd>
+          <dt>Program</dt><dd>{{ user.program or '—' }}</dd>
+          {% endif %}
+          <dt>Registered</dt><dd>{{ user.created_at.strftime('%d %b %Y') }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    {% if user.role == 'examiner' %}
+    <div class="card shadow-sm border-0 mb-3"><div class="card-header">Assigned examinations</div>
+      <ul class="list-group list-group-flush">
+        {% for e in user.assigned_exams %}<li class="list-group-item"><a href="{{ url_for('admin.exam_detail', eid=e.id) }}">{{ e.name }}</a> {{ badge(e.status) }}</li>
+        {% else %}<li class="list-group-item text-muted small">None.</li>{% endfor %}
+      </ul></div>
+    <div class="card shadow-sm border-0"><div class="card-header">Slots</div>
+      <div class="table-responsive"><table class="table table-sm mb-0">
+        <thead><tr><th>Slot</th><th>Exam</th><th>When</th><th>Booked</th><th>Status</th></tr></thead>
+        <tbody>{% for s in user.slots %}<tr><td>{{ s.code }}</td><td>{{ s.exam.name }}</td><td class="small">{{ s.label }}</td><td>{{ s.active_bookings|length }}/{{ s.capacity }}</td><td>{{ badge(s.status) }}</td></tr>
+        {% else %}<tr><td colspan="5" class="text-muted small">No slots.</td></tr>{% endfor %}</tbody></table></div></div>
+    {% else %}
+    <div class="card shadow-sm border-0"><div class="card-header">Complete booking history</div>
+      <div class="table-responsive"><table class="table table-sm mb-0">
+        <thead><tr><th>Booking</th><th>Exam</th><th>Slot</th><th>Booked on</th><th>Marks</th><th>Status</th></tr></thead>
+        <tbody>{% for b in user.bookings|sort(attribute='booking_date', reverse=true) %}
+          <tr><td><a href="{{ url_for('admin.booking_detail', bid=b.id) }}">{{ b.code }}</a></td><td>{{ b.exam.name }}</td><td class="small">{{ b.slot.label }}</td>
+            <td class="small">{{ b.booking_date.strftime('%d %b %Y %H:%M') }}</td>
+            <td>{{ b.evaluation.total_marks|round(2) if b.evaluation else '—' }}</td><td>{{ badge(b.status) }}</td></tr>
+        {% else %}<tr><td colspan="6" class="text-muted small">No bookings.</td></tr>{% endfor %}</tbody></table></div></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

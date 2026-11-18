@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, post_button %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Courses</h3>
+  <a href="{{ url_for('admin.course_form') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New course</a>
+</div>
+<div class="card shadow-sm border-0"><div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead><tr><th>ID</th><th>Code</th><th>Name</th><th>Credits</th><th>Exams</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for c in courses %}
+    <tr><td>{{ c.id }}</td><td class="fw-semibold">{{ c.code }}</td>
+      <td>{{ c.name }}<div class="small text-muted">{{ (c.description or '')[:80] }}</div></td>
+      <td>{{ c.credits or '—' }}</td><td>{{ c.exams|length }}</td><td>{{ badge(c.status) }}</td>
+      <td class="text-end text-nowrap">
+        <a href="{{ url_for('admin.course_form', cid=c.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+        {{ post_button(url_for('admin.course_delete', cid=c.id), 'Remove', 'btn-outline-danger') }}
+      </td></tr>
+  {% else %}<tr><td colspan="7" class="text-center text-muted py-4">No courses yet.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+{% endblock %}

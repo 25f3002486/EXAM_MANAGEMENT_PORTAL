@@ -1,0 +1,31 @@
+{% macro badge(status) -%}
+<span class="badge text-bg-{{ status|badge }}">{{ status }}</span>
+{%- endmacro %}
+
+{% macro stat(label, value, icon, color='primary', link=None) -%}
+<div class="col-6 col-md-4 col-lg">
+  <div class="card stat-card h-100 border-0 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="text-muted small">{{ label }}</div>
+          <div class="fs-3 fw-bold">{{ value }}</div>
+        </div>
+        <i class="bi bi-{{ icon }} fs-3 text-{{ color }}"></i>
+      </div>
+      {% if link %}<a href="{{ link }}" class="stretched-link"></a>{% endif %}
+    </div>
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro post_button(action, label, cls='btn-outline-secondary', name=None, value=None) -%}
+<form method="post" action="{{ action }}" class="d-inline">
+  {% if name %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endif %}
+  <button class="btn btn-sm {{ cls }}">{{ label|safe }}</button>
+</form>
+{%- endmacro %}
+
+{% macro window(start, end) -%}
+{% if start or end %}{{ start.strftime('%d %b %Y') if start else '…' }} – {{ end.strftime('%d %b %Y') if end else '…' }}{% else %}<span class="text-muted">Not set</span>{% endif %}
+{%- endmacro %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, post_button %}
+{% block title %}My bookings{% endblock %}
+{% block content %}
+<h3 class="mb-3">Examination schedule</h3>
+<div class="card shadow-sm border-0 mb-4"><div class="table-responsive">
+<table class="table align-middle mb-0">
+  <thead><tr><th>Date & time</th><th>Examination</th><th>Venue</th><th>Examiner</th><th></th></tr></thead>
+  <tbody>
+  {% for b in schedule %}
+    <tr><td>{{ b.slot.label }} {% if b.slot.date < today %}<span class="badge text-bg-light">past</span>{% endif %}</td>
+      <td>{{ b.exam.name }}<div class="small text-muted">{{ b.exam.exam_type }} · {{ b.exam.duration }} min</div></td>
+      <td class="small">{{ b.slot.venue or 'TBA' }}</td><td>{{ b.slot.examiner.name }}</td>
+      <td class="text-end">{% if b.exam.booking_allowed %}{{ post_button(url_for('student.cancel', bid=b.id), 'Cancel', 'btn-outline-danger') }}
+        {% else %}<span class="small text-muted">Deadline passed</span>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="5" class="text-center text-muted py-4">No upcoming bookings. <a href="{{ url_for('student.exams', open=1) }}">Find an examination</a></td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+
+<h4 class="mb-3">Booking history</h4>
+<div class="card shadow-sm border-0"><div class="table-responsive">
+<table class="table table-sm align-middle mb-0">
+  <thead><tr><th>Booking</th><th>Examination</th><th>Slot</th><th>Booked on</th><th>Status</th><th>Activity</th></tr></thead>
+  <tbody>
+  {% for b in bookings %}
+    <tr><td>{{ b.code }}</td><td>{{ b.exam.name }}</td><td class="small">{{ b.slot.label }}</td>
+      <td class="small">{{ b.booking_date.strftime('%d %b %Y %H:%M') }}</td><td>{{ badge(b.status) }}</td>
+      <td class="small text-muted">{% for l in b.logs %}{{ l.action }} ({{ l.timestamp.strftime('%d %b') }}){% if not loop.last %} → {% endif %}{% endfor %}</td></tr>
+  {% else %}<tr><td colspan="6" class="text-center text-muted py-4">No bookings yet.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stat, badge %}
+{% block title %}Student Dashboard{% endblock %}
+{% block content %}
+<h3 class="mb-3">Hello, {{ current_user.name }}</h3>
+<div class="row g-3 mb-4">
+  {{ stat('Exams open for booking', open_exams|length, 'clipboard-check', 'primary', url_for('student.exams', open=1)) }}
+  {{ stat('Available slots', available_count, 'calendar3', 'info', url_for('student.exams', open=1)) }}
+  {{ stat('Upcoming exams', upcoming|length, 'alarm', 'warning', url_for('student.bookings')) }}
+  {{ stat('Booked slots', active|length, 'bookmark-check', 'success', url_for('student.bookings')) }}
+  {{ stat('Published results', results|length, 'award', 'danger', url_for('student.results')) }}
+</div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card shadow-sm border-0 mb-3"><div class="card-header">Available examinations</div>
+      <ul class="list-group list-group-flush">
+        {% for e in open_exams %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ e.name }}<br><span class="small text-muted">{{ e.course.code }} · {{ e.exam_type }} · book by {{ e.booking_end.strftime('%d %b %Y') if e.booking_end else '—' }}</span></span>
+          {% if e.id in booked_exam_ids %}<span class="badge text-bg-primary">Booked</span>
+          {% else %}<a href="{{ url_for('student.exam_detail', eid=e.id) }}" class="btn btn-sm btn-primary">Book slot</a>{% endif %}
+        </li>
+        {% else %}<li class="list-group-item text-muted small">No examinations are open for booking right now.</li>{% endfor %}
+      </ul></div>
+    <div class="card shadow-sm border-0"><div class="card-header">Available slots</div>
+      <ul class="list-group list-group-flush">
+        {% for s in available_slots %}
+        <li class="list-group-item small d-flex justify-content-between"><span><a href="{{ url_for('student.exam_detail', eid=s.exam_id) }}">{{ s.exam.name }}</a> · {{ s.label }}</span>
+          <span class="text-muted">{{ s.available_seats }} seats</span></li>
+        {% else %}<li class="list-group-item text-muted small">No open slots.</li>{% endfor %}
+      </ul></div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card shadow-sm border-0 mb-3"><div class="card-header">Upcoming examinations</div>
+      <ul class="list-group list-group-flush">
+        {% for b in upcoming %}
+        <li class="list-group-item small"><strong>{{ b.exam.name }}</strong> — {{ b.slot.label }}<br>
+          <span class="text-muted">{{ b.slot.venue or 'Venue TBA' }} · Examiner: {{ b.slot.examiner.name }} · {{ b.code }}</span></li>
+        {% else %}<li class="list-group-item text-muted small">No upcoming examinations.</li>{% endfor %}
+      </ul></div>
+    <div class="card shadow-sm border-0"><div class="card-header">Published results</div>
+      <ul class="list-group list-group-flush">
+        {% for b in results[:5] %}
+        <li class="list-group-item small d-flex justify-content-between"><span>{{ b.exam.name }}</span>
+          <a href="{{ url_for('student.scorecard', bid=b.id) }}">{{ b.evaluation.total_marks|round(2) }} / {{ b.exam.max_marks|round(1) }}</a></li>
+        {% else %}<li class="list-group-item text-muted small">No results published yet.</li>{% endfor %}
+      </ul></div>
+  </div>
+</div>
+{% endblock %}

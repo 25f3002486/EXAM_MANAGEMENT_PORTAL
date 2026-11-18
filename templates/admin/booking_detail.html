@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, post_button %}
+{% block title %}{{ booking.code }}{% endblock %}
+{% block content %}
+{% set b = booking %}
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <h3>Booking {{ b.code }} {{ badge(b.status) }}</h3>
+  {% if b.status == 'Booked' %}
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.booking_reschedule', bid=b.id) }}" class="btn btn-primary"><i class="bi bi-calendar2-week"></i> Reschedule</a>
+    <a href="{{ url_for('admin.slot_change_examiner', sid=b.slot_id) }}" class="btn btn-outline-primary">Change examiner</a>
+    {{ post_button(url_for('admin.booking_cancel', bid=b.id), 'Cancel booking', 'btn-outline-danger') }}
+  </div>
+  {% endif %}
+</div>
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100"><div class="card-body">
+      <dl class="row mb-0 small">
+        <dt class="col-5">Student</dt><dd class="col-7"><a href="{{ url_for('admin.user_detail', uid=b.student_id) }}">{{ b.student.name }}</a> ({{ b.student.roll_no }})</dd>
+        <dt class="col-5">Examination</dt><dd class="col-7"><a href="{{ url_for('admin.exam_detail', eid=b.exam_id) }}">{{ b.exam.name }}</a></dd>
+        <dt class="col-5">Slot</dt><dd class="col-7">{{ b.slot.code }} · {{ b.slot.label }}</dd>
+        <dt class="col-5">Venue</dt><dd class="col-7">{{ b.slot.venue or '—' }}</dd>
+        <dt class="col-5">Examiner</dt><dd class="col-7">{{ b.slot.examiner.name }}</dd>
+        <dt class="col-5">Booked on</dt><dd class="col-7">{{ b.booking_date.strftime('%d %b %Y %H:%M') }}</dd>
+        {% if b.cancelled_at %}<dt class="col-5">Cancelled on</dt><dd class="col-7">{{ b.cancelled_at.strftime('%d %b %Y %H:%M') }}</dd>{% endif %}
+      </dl>
+      {% if b.evaluation %}
+      <hr><h6>Evaluation — {{ b.evaluation.total_marks|round(2) }} / {{ b.exam.max_marks|round(1) }}</h6>
+      <ul class="small mb-1">{% for s in b.evaluation.scores %}<li>{{ s.rubric.criterion }}: {{ s.marks }} / {{ s.rubric.max_marks }}</li>{% endfor %}</ul>
+      <p class="small mb-0"><em>{{ b.evaluation.remarks or 'No remarks' }}</em> — {{ b.evaluation.examiner.name }}</p>
+      {% endif %}
+    </div></div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100"><div class="card-header">History</div>
+      <ul class="list-group list-group-flush">
+        {% for l in b.logs %}
+        <li class="list-group-item small"><span class="fw-semibold">{{ l.action }}</span> · {{ l.timestamp.strftime('%d %b %Y %H:%M') }}
+          {% if l.actor %}<span class="text-muted">by {{ l.actor.name }}</span>{% endif %}<div class="text-muted">{{ l.details }}</div></li>
+        {% endfor %}
+      </ul></div>
+  </div>
+</div>
+{% endblock %}

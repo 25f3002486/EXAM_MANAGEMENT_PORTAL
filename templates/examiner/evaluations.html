@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}Evaluations{% endblock %}
+{% block content %}
+<h3 class="mb-3">Students to evaluate</h3>
+<div class="card shadow-sm border-0"><div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Student</th><th>Examination</th><th>Slot</th><th>Marks</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for b in bookings %}
+    <tr><td>{{ b.student.name }}<div class="small text-muted">{{ b.student.roll_no }}</div></td>
+      <td>{{ b.exam.name }}</td><td class="small">{{ b.slot.label }}</td>
+      <td>{{ (b.evaluation.total_marks|round(2) ~ ' / ' ~ b.exam.max_marks|round(1)) if b.evaluation else '—' }}</td>
+      <td>{{ badge('Completed' if b.evaluation else 'Pending') }}</td>
+      <td class="text-end">
+        {% if b.evaluation and b.exam.results_published %}<span class="small text-muted">Published</span>
+        {% else %}<a href="{{ url_for('examiner.evaluate', bid=b.id) }}" class="btn btn-sm {{ 'btn-outline-primary' if b.evaluation else 'btn-primary' }}">{{ 'Edit' if b.evaluation else 'Evaluate' }}</a>{% endif %}
+      </td></tr>
+  {% else %}<tr><td colspan="6" class="text-center text-muted py-4">No students are booked into your slots.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+{% endblock %}

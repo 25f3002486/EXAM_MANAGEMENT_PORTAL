@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, post_button %}
+{% block title %}Examination slots{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h3 class="mb-0">All examination slots</h3>
+  <form class="d-flex gap-2">
+    <select name="exam_id" class="form-select form-select-sm"><option value="">All examinations</option>
+      {% for e in exams %}<option value="{{ e.id }}" {% if e.id == eid %}selected{% endif %}>{{ e.name }}</option>{% endfor %}</select>
+    <select name="status" class="form-select form-select-sm"><option value="">All statuses</option>
+      {% for s in statuses %}<option {% if s == status %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>
+    <button class="btn btn-sm btn-outline-secondary">Filter</button>
+  </form>
+</div>
+<div class="card shadow-sm border-0"><div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Slot</th><th>Examination</th><th>Date & time</th><th>Venue</th><th>Examiner</th><th>Seats left</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for s in slots %}
+    <tr><td>{{ s.code }}</td><td><a href="{{ url_for('admin.exam_detail', eid=s.exam_id) }}">{{ s.exam.name }}</a></td>
+      <td class="small">{{ s.label }}</td><td class="small">{{ s.venue or '—' }}</td><td>{{ s.examiner.name }}</td>
+      <td>{{ s.available_seats }}/{{ s.capacity }}</td><td>{{ badge(s.status) }}</td>
+      <td class="text-end text-nowrap">
+        {% if s.status not in ['Cancelled', 'Completed'] %}
+        <a href="{{ url_for('admin.slot_change_examiner', sid=s.id) }}" class="btn btn-sm btn-outline-primary">Change examiner</a>
+        {{ post_button(url_for('admin.slot_cancel', sid=s.id), 'Cancel', 'btn-outline-danger') }}
+        {% endif %}
+      </td></tr>
+  {% else %}<tr><td colspan="8" class="text-center text-muted py-4">No slots found.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+{% endblock %}

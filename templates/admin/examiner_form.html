@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Add examiner{% endblock %}
+{% block content %}
+{% set f = request.form %}
+<div class="card shadow-sm border-0 mx-auto" style="max-width:640px">
+  <div class="card-header">Add examiner <span class="text-muted fw-normal small">(account is active immediately)</span></div>
+  <div class="card-body">
+    <form method="post">
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">Name *</label><input name="name" class="form-control" required value="{{ f.get('name','') }}"></div>
+        <div class="col-md-6"><label class="form-label">Email *</label><input type="email" name="email" class="form-control" required value="{{ f.get('email','') }}"></div>
+        <div class="col-md-6"><label class="form-label">Phone</label><input name="phone" class="form-control" value="{{ f.get('phone','') }}"></div>
+        <div class="col-md-6"><label class="form-label">Department</label><input name="department" class="form-control" value="{{ f.get('department','') }}"></div>
+        <div class="col-md-6"><label class="form-label">Designation</label><input name="designation" class="form-control" value="{{ f.get('designation','') }}"></div>
+        <div class="col-md-6"><label class="form-label">Initial password *</label><input type="password" name="password" minlength="6" class="form-control" required></div>
+      </div>
+      <div class="mt-4"><button class="btn btn-primary">Add examiner</button>
+        <a href="{{ url_for('admin.examiners') }}" class="btn btn-link">Cancel</a></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Evaluate{% endblock %}
+{% block content %}
+<div class="card shadow-sm border-0 mx-auto" style="max-width:760px">
+  <div class="card-header">Evaluate · {{ booking.student.name }} ({{ booking.student.roll_no }})</div>
+  <div class="card-body">
+    <p class="text-muted small">{{ exam.name }} · {{ booking.slot.label }} · Maximum {{ exam.max_marks|round(1) }} marks</p>
+    <form method="post">
+      {% if exam.rubrics %}
+      <table class="table align-middle">
+        <thead><tr><th>Criterion</th><th>Weight</th><th style="width:160px">Marks</th></tr></thead>
+        <tbody>
+        {% for r in exam.rubrics %}
+          <tr><td>{{ r.criterion }}<div class="small text-muted">{{ r.description or '' }}</div></td>
+            <td>{{ r.weightage|round(1) }}%</td>
+            <td><div class="input-group input-group-sm">
+              <input type="number" name="rubric_{{ r.id }}" step="0.5" min="0" max="{{ r.max_marks }}" class="form-control" required value="{{ existing.get(r.id, '') }}">
+              <span class="input-group-text">/ {{ r.max_marks|round(1) }}</span></div></td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <p class="small text-muted">Total = max marks × Σ(marks ÷ criterion max × weightage) ÷ Σ weightage.</p>
+      {% else %}
+      <label class="form-label">Total marks *</label>
+      <div class="input-group mb-3" style="max-width:240px">
+        <input type="number" name="total_marks" step="0.5" min="0" max="{{ exam.max_marks }}" class="form-control" required value="{{ ev.total_marks if ev else '' }}">
+        <span class="input-group-text">/ {{ exam.max_marks|round(1) }}</span></div>
+      {% endif %}
+      <label class="form-label">Remarks / feedback</label>
+      <textarea name="remarks" rows="3" class="form-control">{{ request.form.get('remarks') or (ev.remarks if ev and ev.remarks else '') }}</textarea>
+      <div class="mt-4"><button class="btn btn-primary">Submit evaluation</button>
+        <a href="{{ url_for('examiner.evaluations') }}" class="btn btn-link">Cancel</a></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stat, badge %}
+{% block title %}Examiner Dashboard{% endblock %}
+{% block content %}
+<h3 class="mb-3">Welcome, {{ current_user.name }}</h3>
+<div class="row g-3 mb-4">
+  {{ stat('Assigned examinations', exams|length, 'clipboard-check', 'primary', url_for('examiner.exams')) }}
+  {{ stat('Slots created', slots|length, 'calendar3', 'info', url_for('examiner.slots')) }}
+  {{ stat('Students booked', booked_count, 'people', 'success', url_for('examiner.evaluations')) }}
+  {{ stat('Pending evaluations', pending|length, 'hourglass-split', 'warning', url_for('examiner.evaluations')) }}
+</div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card shadow-sm border-0 h-100"><div class="card-header">Assigned examinations</div>
+      <ul class="list-group list-group-flush">
+        {% for e in exams %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ e.name }}<br><span class="small text-muted">{{ e.course.code }} · {{ e.exam_type }}</span></span>
+          <span>{{ badge(e.status) }}
+            {% if e.slot_creation_allowed %}<a href="{{ url_for('examiner.slot_new', eid=e.id) }}" class="btn btn-sm btn-primary ms-1">+ Slot</a>{% endif %}</span>
+        </li>
+        {% else %}<li class="list-group-item text-muted small">No examinations assigned yet. The admin assigns examiners to examinations.</li>{% endfor %}
+      </ul></div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card shadow-sm border-0 mb-3"><div class="card-header">Pending evaluations</div>
+      <ul class="list-group list-group-flush">
+        {% for b in pending[:6] %}
+        <li class="list-group-item d-flex justify-content-between align-items-center small">
+          <span>{{ b.student.name }} ({{ b.student.roll_no }})<br><span class="text-muted">{{ b.exam.name }} · {{ b.slot.label }}</span></span>
+          <a href="{{ url_for('examiner.evaluate', bid=b.id) }}" class="btn btn-sm btn-outline-primary">Evaluate</a></li>
+        {% else %}<li class="list-group-item text-muted small">Nothing pending.</li>{% endfor %}
+      </ul></div>
+    <div class="card shadow-sm border-0"><div class="card-header">Upcoming slots</div>
+      <ul class="list-group list-group-flush">
+        {% for s in upcoming %}
+        <li class="list-group-item small d-flex justify-content-between"><span><a href="{{ url_for('examiner.slot_students', sid=s.id) }}">{{ s.label }}</a> · {{ s.exam.name }}</span>
+          <span>{{ s.active_bookings|length }}/{{ s.capacity }} {{ badge(s.status) }}</span></li>
+        {% else %}<li class="list-group-item text-muted small">No upcoming slots.</li>{% endfor %}
+      </ul></div>
+  </div>
+</div>
+{% endblock %}
