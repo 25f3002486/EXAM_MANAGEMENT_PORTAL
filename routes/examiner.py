@@ -123,9 +123,12 @@ def slot_delete(sid):
     slot = own_slot(sid)
     if not slot.editable:
         flash("Slots can only be removed before booking starts and while unbooked.", "warning")
+    elif slot.bookings:
+        # Past (cancelled) bookings point at this slot: keep them by cancelling the slot instead of deleting it
+        slot.status, slot.available_seats = "Cancelled", 0
+        db.session.commit()
+        flash("Slot removed. It is kept as Cancelled because it has booking history.", "success")
     else:
-        for b in list(slot.bookings):
-            db.session.delete(b)
         db.session.delete(slot)
         db.session.commit()
         flash("Slot removed.", "success")

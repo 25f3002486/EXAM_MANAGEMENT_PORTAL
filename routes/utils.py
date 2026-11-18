@@ -70,6 +70,17 @@ def slots_overlap(examiner_id, slot_date, start, end, exclude_id=None):
     return q.first() is not None
 
 
+# Find a student's active booking whose slot overlaps the given slot
+def student_clash(student_id, slot, exclude_booking_id=None):
+    from models import Booking, Slot
+    q = Booking.query.join(Slot).filter(Booking.student_id == student_id, Booking.status == "Booked",
+                                        Slot.date == slot.date,
+                                        Slot.start_time < slot.end_time, Slot.end_time > slot.start_time)
+    if exclude_booking_id:
+        q = q.filter(Booking.id != exclude_booking_id)
+    return q.first()
+
+
 # Parse a plain or prefixed ID into an int
 def search_id(q, prefix):
     q = q.strip().upper()

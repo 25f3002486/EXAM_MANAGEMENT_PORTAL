@@ -5,7 +5,7 @@ from flask_login import current_user
 from sqlalchemy import or_
 
 from models import db, Course, Exam, Slot, Booking, EXAM_TYPES
-from .utils import role_required, to_int, log_booking
+from .utils import role_required, to_int, log_booking, student_clash
 
 bp = Blueprint("student", __name__)
 
@@ -89,11 +89,10 @@ def book(sid):
     if slot.status != "Available" or slot.date < date.today():
         flash("This slot is not available.", "danger")
         return back
-    for b in my_bookings("Booked"):
-        s = b.slot
-        if s.date == slot.date and s.start_time < slot.end_time and s.end_time > slot.start_time:
-            flash(f"This slot clashes with your booking for {b.exam.name}.", "danger")
-            return back
+    clash = student_clash(current_user.id, slot)
+    if clash:
+        flash(f"This slot clashes with your booking for {clash.exam.name}.", "danger")
+        return back
     updated = (Slot.query.filter(Slot.id == slot.id, Slot.available_seats > 0, Slot.status == "Available")
                .update({Slot.available_seats: Slot.available_seats - 1}, synchronize_session=False))
     if not updated:

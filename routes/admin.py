@@ -3,7 +3,8 @@ from sqlalchemy import func, or_
 
 from models import (db, User, Course, Exam, Rubric, Slot, Booking, Evaluation,
                     EXAM_TYPES, EXAM_STATUSES, SLOT_STATUSES, BOOKING_STATUSES)
-from .utils import role_required, parse_date, to_float, to_int, log_booking, search_id, slots_overlap
+from .utils import (role_required, parse_date, to_float, to_int, log_booking, search_id, slots_overlap,
+                    student_clash)
 
 bp = Blueprint("admin", __name__)
 
@@ -426,8 +427,12 @@ def booking_reschedule(bid):
                                 Slot.status == "Available").order_by(Slot.date, Slot.start_time).all()
     if request.method == "POST":
         new_slot = db.session.get(Slot, to_int(request.form.get("slot_id")) or 0)
+        clash = new_slot and student_clash(booking.student_id, new_slot, exclude_booking_id=booking.id)
         if not new_slot or new_slot not in options:
             flash("Choose an available slot of the same examination.", "danger")
+        elif clash:
+            flash(f"{booking.student.name} already has a booking at that time "
+                  f"({clash.code}, {clash.exam.name}).", "danger")
         else:
             old_slot = booking.slot
             booking.slot = new_slot
